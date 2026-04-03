@@ -303,8 +303,26 @@ Postiz UPLOAD drafts do not appear in the Profile → Drafts tab. That tab only 
 ### keyevent 26 Toggles Power — Use 224 Instead
 `adb shell input keyevent 26` toggles the screen — if it's ON, it turns it OFF. Use `keyevent 224` (KEYCODE_WAKEUP) which only wakes, never sleeps.
 
+### Always Prefix Audio Searches with the Genre/Category
+Single-word searches return unrelated popular results. "nas" returns rapper Nas. "ikhlas" returns random content. Always include the category prefix:
+- ✅ `surah nas`, `surah ikhlas`, `surah mulk`, `surah yasin`
+- ✅ `lofi beats`, `nasheed instrumental`
+- ❌ Never just `nas`, `ikhlas`, `asr` alone
+
+### Audio Selection — Pink Checkmarks ≠ Selected
+The audio results list shows pink checkmark buttons on the right of every item. These mean "available to add to favorites" — **not** that the audio is selected for your post.
+
+**How to confirm audio is actually selected:**
+- ✅ The **top bar text changes** from the old track name to the new one — this is the only reliable indicator
+- ❌ The "Current sound" label at the bottom of the picker lags and may still show the old track
+- ❌ Pink checkmarks on list rows = available/favorited, NOT selected
+- ✅ Pink/red **highlighted row text** = that row is the active selection
+
+### `d(description="Add sound")` May Not Exist
+When the draft already has audio attached (from a previous edit session), the button is labeled as the current track name (e.g. "Heavenly Rapture"), not "Add sound". Find it via `dump_hierarchy()` and look for the track name text, then tap that element to reopen the picker.
+
 ### Audio Search — Keep Terms Short, No Spaces
-`adb shell input text` URL-encodes spaces (`%20`). Use `uiautomator2`'s `set_text()` instead, and keep search terms to one word: `lofi`, `quran`, `nasheed`, `ikhlas`, `asr`.
+`adb shell input text` URL-encodes spaces (`%20`). Use `uiautomator2`'s `set_text()` instead. Keep search terms short — two words max.
 
 ---
 
