@@ -14,6 +14,49 @@ Automates the final step of TikTok scheduling: your scheduling tool pushes the d
 
 ---
 
+## ⚠️ HOW TO RUN THIS — READ FIRST
+
+### Run in the MAIN OpenClaw session. Never subagents. Never isolated sessions.
+
+```
+sessionTarget: "current"   ✅
+sessionTarget: "isolated"  ❌ WILL FAIL
+```
+
+**Why subagents fail on this task:**
+- ADB is a stateful connection — isolated sessions start cold on every tool call
+- The screenshot → analyze → tap loop requires fast back-and-forth that isolated sessions can't sustain
+- Isolated sessions hit context/time limits mid-flow and die with no recovery path
+- Tested and confirmed: main session completes in ~2 min, isolated sessions timeout every time
+
+**Cron config:**
+```json
+{
+  "sessionTarget": "current",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Post today's TikTok draft. Read SKILL.md and execute the full flow."
+  }
+}
+```
+
+### The correct posting sequence (end-to-end, proven):
+1. Check your scheduling tool's queue → find today's surah/audio name
+2. Pre-flight: disable DND (`zen_mode 0`), confirm screen awake
+3. Open TikTok → go to in-app notification inbox → tap scheduling tool notification
+4. Fallback if no notification: force-stop TikTok, relaunch, tap Edit on stale draft popup
+5. Tap the current audio track name in the top bar → audio picker opens
+6. Search "surah [name]" (always prefix — bare name returns unrelated results)
+7. Tap the **row** in the results list (not the checkmark button on the right)
+8. Verify the **top bar text** changed to the new audio name (ground truth — ignore bottom labels)
+9. Swipe down to close picker
+10. Tap Next → tap Post
+11. Screenshot "Photos posted!" confirmation, report result
+
+**Target time: under 3 minutes.** If it's taking longer, take a screenshot and diagnose before continuing. Don't tap blind.
+
+---
+
 ## Configuration
 
 Fill these in before using the skill:
