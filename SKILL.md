@@ -40,20 +40,52 @@ sessionTarget: "isolated"  ❌ WILL FAIL
 }
 ```
 
-### The correct posting sequence (end-to-end, proven):
-1. Check your scheduling tool's queue → find today's surah/audio name
-2. Pre-flight: disable DND (`zen_mode 0`), confirm screen awake
-3. Open TikTok → go to in-app notification inbox → tap scheduling tool notification
-4. Fallback if no notification: force-stop TikTok, relaunch, tap Edit on stale draft popup
-5. Tap the current audio track name in the top bar → audio picker opens
-6. Search "surah [name]" (always prefix — bare name returns unrelated results)
-7. Tap the **row** in the results list (not the checkmark button on the right)
-8. Verify the **top bar text** changed to the new audio name (ground truth — ignore bottom labels)
-9. Swipe down to close picker
-10. Tap Next → tap Post
-11. Screenshot "Photos posted!" confirmation, report result
+### The correct posting sequence (end-to-end, proven under 2 min):
 
-**Target time: under 3 minutes.** If it's taking longer, take a screenshot and diagnose before continuing. Don't tap blind.
+```
+1. Pre-flight
+   adb connect → zen_mode 0 → force-stop app → relaunch → wait 4s
+
+2. Find draft
+   Inbox tab → System notifications → tap scheduling tool notification
+
+3. Verify you're in the editor
+   UI dump must show "Your Story" + "Next" + an audio name in top bar
+
+4. Check existing audio
+   If top bar already shows correct audio → skip to step 7
+   If wrong audio → proceed to step 5
+
+5. Open picker + search
+   Tap audio name in top bar → picker opens
+   Tap Search → type your search term → press enter → wait 3s
+
+6. Select audio
+   Tap 1st carousel thumbnail → tap checkmark on that same card
+   DO NOT browse multiple options. Pick the first result and stop.
+
+7. ⚠️ HARD GATE — verify audio before posting
+   Close picker fully (press back until editor shows)
+   READ THE TOP BAR TEXT in the main editor
+   If it shows the correct audio → proceed
+   If it shows ANYTHING ELSE → DO NOT POST — go back to step 5
+   Audio selection from search can revert on back navigation.
+   This gate catches that. Never skip it.
+
+8. Post
+   Tap Next → wait 3s → tap Post → wait 5s
+
+9. Confirm
+   Screenshot → verify "Photos posted!" banner → done
+```
+
+**Target time: under 2 minutes.** Do not deviate from these steps.
+
+### What makes the fast run work:
+- **No deliberation** — don't compare audio options, pick the first carousel result
+- **No extra screenshots** — `dump_hierarchy()` is faster for checking UI state
+- **One shot** — if the draft already has correct audio, skip straight to step 7
+- **Hard gate at step 7** — catches audio reversion bugs. Never skip it.
 
 ---
 
